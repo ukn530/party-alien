@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 019c3583d87584c2e8c2c70dc0cb4062
+timeCreated: 1488207635
+licenseType: Free
+NativeFormatImporter:
+  userData: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 318 359\"><defs><style>.cls-1{fill:#f8e71c;}.cls-2{fill:#fff;stroke:#000;stroke-miterlimit:10;stroke-width:6px;}</style></defs><title>player2</title><g
+    id=\"\u30EC\u30A4\u30E4\u30FC_2\" data-name=\"\u30EC\u30A4\u30E4\u30FC 2\"><g
+    id=\"\u30EC\u30A4\u30E4\u30FC_1-2\" data-name=\"\u30EC\u30A4\u30E4\u30FC 1\"><g
+    id=\"player1\"><path class=\"cls-1\" d=\"M159,315C73,315,3,245,3,159S73,3,159,3,315,73,315,159,245,315,159,315Z\"/><path
+    d=\"M159,6A153,153,0,0,1,267.19,267.19,153,153,0,0,1,50.81,50.81,152,152,0,0,1,159,6m0-6A159,159,0,1,0,318,159,159,159,0,0,0,159,0Z\"/><circle
+    cx=\"176\" cy=\"106\" r=\"9\"/><circle cx=\"239\" cy=\"106\" r=\"9\"/><line class=\"cls-2\"
+    x1=\"131.45\" y1=\"312.62\" x2=\"127.5\" y2=\"349.5\"/><line class=\"cls-2\" x1=\"187.45\"
+    y1=\"312.62\" x2=\"191.5\" y2=\"349.5\"/><ellipse cx=\"201.5\" cy=\"349.59\" rx=\"14.5\"
+    ry=\"9.41\"/><ellipse cx=\"138.5\" cy=\"349.59\" rx=\"14.5\" ry=\"9.41\"/></g></g></g></svg>"
+  assetBundleName: 
+  assetBundleVariant: 

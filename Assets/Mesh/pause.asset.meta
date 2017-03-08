@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 760ee9c4c882f488895c8a0976e84648
+timeCreated: 1484580572
+licenseType: Free
+NativeFormatImporter:
+  userData: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg width=\"28px\" height=\"28px\"
+    viewBox=\"0 0 28 28\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n
+    \   <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch
+    -->\n    <title>Combined Shape</title>\n    <desc>Created with Sketch.</desc>\n
+    \   <defs></defs>\n    <g id=\"Symbols\" stroke=\"none\" stroke-width=\"1\" fill=\"none\"
+    fill-rule=\"evenodd\" opacity=\"0.500339674\">\n        <g id=\"ui_pause\" fill=\"#000000\">\n
+    \           <g id=\"Combined-Shape\">\n                <path d=\"M14,28 C6.2680135,28
+    0,21.7319865 0,14 C0,6.2680135 6.2680135,0 14,0 C21.7319865,0 28,6.2680135 28,14
+    C28,21.7319865 21.7319865,28 14,28 Z M14,25 C20.0751322,25 25,20.0751322 25,14
+    C25,7.92486775 20.0751322,3 14,3 C7.92486775,3 3,7.92486775 3,14 C3,20.0751322
+    7.92486775,25 14,25 Z M9,9 L12,9 L12,19 L9,19 L9,9 Z M16,9 L19,9 L19,19 L16,19
+    L16,9 Z\"></path>\n            </g>\n        </g>\n    </g>\n</svg>"
+  assetBundleName: 
+  assetBundleVariant: 

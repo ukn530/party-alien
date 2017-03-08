@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 3b80321239a1e4a438300f6c662784a0
+timeCreated: 1488721687
+licenseType: Free
+NativeFormatImporter:
+  userData: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 83 83\"><defs><style>.cls-1{fill:#f8e71c;}</style></defs><title>IconPlayer</title><g
+    id=\"\u30EC\u30A4\u30E4\u30FC_2\" data-name=\"\u30EC\u30A4\u30E4\u30FC 2\"><g
+    id=\"\u30EC\u30A4\u30E4\u30FC_1-2\" data-name=\"\u30EC\u30A4\u30E4\u30FC 1\"><path
+    class=\"cls-1\" d=\"M41.5,80A38.5,38.5,0,1,1,80,41.5,38.54,38.54,0,0,1,41.5,80Z\"/><path
+    d=\"M41.5,6A35.5,35.5,0,1,1,6,41.5,35.54,35.54,0,0,1,41.5,6m0-6A41.5,41.5,0,1,0,83,41.5,41.5,41.5,0,0,0,41.5,0Z\"/><circle
+    cx=\"31.5\" cy=\"32\" r=\"4\"/><circle cx=\"51.5\" cy=\"32\" r=\"4\"/></g></g></svg>"
+  assetBundleName: 
+  assetBundleVariant: 

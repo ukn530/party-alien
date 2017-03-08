@@ -4,7 +4,8 @@
 Temp/
 obj/
 UnityGenerated/
-AlienTest/
+Library/
+iOS/
 
 # ===================================== #
 # Visual Studio / MonoDevelop generated #
