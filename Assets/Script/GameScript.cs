@@ -25,26 +25,25 @@ public class GameScript : MonoBehaviour {
 	public GameObject noteNormal;
 	public GameObject noteLoud;
 	public GameObject iconEnemy;
+	public GameObject iconPlayer;
 	public GameObject score;
-
-	GameObject icon;
 
 	AudioSource audioSource;
 
-	Vector3 posIconMove;
-	Vector3 posIconMoveTo;
+	float posIconMoveX;
+	float posIconMoveToX;
 
 	// Use this for initialization
 	void Start () {
 		Application.targetFrameRate = 60;
 
 		scores = new int[][]{
-//			new int[] {0,0,1,1,0,0,1,0}, 
-//			new int[] {0,0,1,1,0,0,1,0}, 
-//			new int[] {0,1,0,1,0,1,1,1}, 
-//			new int[] {1,0,1,0,1,1,0,1},
-//			new int[] {1,0,1,0,0,1,0,1},
-//			new int[] {0,1,0,1,0,1,1,1},
+			new int[] {0,0,1,1,0,0,1,0}, 
+			new int[] {0,0,1,1,0,0,1,0}, 
+			new int[] {0,1,0,1,0,1,1,1}, 
+			new int[] {1,0,1,0,1,1,0,1},
+			new int[] {1,0,1,0,0,1,0,1},
+			new int[] {0,1,0,1,0,1,1,1},
 			new int[] {0,1,0,1,1,1,0,1},
 			new int[] {0,0,1,0,0,0,1,1,0,0,1,1,0,0,1,0}
 		};
@@ -56,13 +55,9 @@ public class GameScript : MonoBehaviour {
 		scoreNum = 0;
 		beatTime = 2.0f / GameScript.scores [scoreNum].Length;
 
-		posIconMove = Vector3.zero;
-		posIconMoveTo = Vector3.zero;
-
-		icon = Instantiate (iconEnemy);
+		iconEnemy.transform.position = new Vector3(posIconMoveX, iconEnemy.transform.position.y);
+		iconPlayer.transform.position = new Vector3(posIconMoveX, iconPlayer.transform.position.y);
 		calcPositionForIcon ();
-		icon.transform.position = posIconMove;
-		icon.transform.parent = score.transform;
 
 		DrawScore ();
 
@@ -84,11 +79,10 @@ public class GameScript : MonoBehaviour {
 				beatTime = 2.0f / scores[scoreNum].Length;
 				state = State.Enemy;
 				DrawScore ();
-				icon.transform.position = posIconMove;
-				Debug.Log ("State Enemy");
+				iconEnemy.transform.position = new Vector3(posIconMoveX, iconEnemy.transform.position.y);
 			} else {
 				state = State.Player;
-				Debug.Log ("State Player");
+				iconPlayer.transform.position = new Vector3(posIconMoveX, iconPlayer.transform.position.y);
 			}
 		}
 
@@ -96,10 +90,13 @@ public class GameScript : MonoBehaviour {
 			// 1フレームでどれだけ進めばいいか。
 			// かかるフレーム数にdeltaTimeをかける
 			// (100 - 10)をbeatTime*scores[scoreNum].Length秒で進めばいい
-			icon.SetActive (true);
-			icon.transform.Translate (Vector3.right * Time.deltaTime * (posIconMoveTo.x - posIconMove.x) / 2);
+			iconPlayer.SetActive(false);
+			iconEnemy.SetActive (true);
+			iconEnemy.transform.Translate (Vector3.right * Time.deltaTime * (posIconMoveToX - posIconMoveX) / 2);
 		} else if (state == State.Player) {
-			icon.SetActive (false);
+			iconEnemy.SetActive (false);
+			iconPlayer.SetActive (true);
+			iconPlayer.transform.Translate (Vector3.right * Time.deltaTime * (posIconMoveToX - posIconMoveX) / 2);
 		}
 	}
 
@@ -136,9 +133,13 @@ public class GameScript : MonoBehaviour {
 		}
 	}
 
+	void initIcon () {
+		
+	}
+
 	void calcPositionForIcon () {
-		posIconMove = noteWrapperEnemy.transform.GetChild (0).transform.position;
-		Vector3 intervalIconMove = noteWrapperEnemy.transform.GetChild (1).transform.position - posIconMove;
-		posIconMoveTo = noteWrapperEnemy.transform.GetChild (scores [scoreNum].Length - 1).transform.position + intervalIconMove;
+		posIconMoveX = noteWrapperEnemy.transform.GetChild (0).transform.position.x;
+		float intervalIconMoveX = noteWrapperEnemy.transform.GetChild (1).transform.position.x - posIconMoveX;
+		posIconMoveToX = noteWrapperEnemy.transform.GetChild (scores [scoreNum].Length - 1).transform.position.x + intervalIconMoveX;
 	}
 }
