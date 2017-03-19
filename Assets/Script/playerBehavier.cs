@@ -11,21 +11,6 @@ public class playerBehavier : MonoBehaviour {
 	public SVGAsset player1, player2, player3, player4, player5, player6;
 	public Mesh p1, p2, p3, p4, p5, p6, p7, p8;
 
-//	public Text scoreText;
-//	public Text timingText;
-
-	AudioSource audioSource;
-	public AudioClip snare;
-	public AudioClip failSound;
-	public AudioClip goodSound;
-	public AudioClip greatSound;
-	public AudioClip perfectSound;
-
-
-	bool tapped;
-//	float timeCounterInABar;
-//	int point;
-
 	public GameObject textRate;
 	public SVGAsset goodRate;
 	public SVGAsset greatRate;
@@ -48,79 +33,14 @@ public class playerBehavier : MonoBehaviour {
 		svgRenderer = gameObject.GetComponent<SVGRenderer> ();
 
 		meshs = new Mesh[] {p1, p2, p3, p4, p5, p6, p7, p8};
-//		timeCounterInABar = 0.0625f;
-
-//		point = 0;
-
-		audioSource = GetComponent<AudioSource> ();
 	}
 
 	// Update is called once per frame
 	void Update () {
-		/*
-		if (GameScript.state == GameScript.State.Player && tag == "Player") {
-			
-			if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began || Input.GetMouseButtonDown (0) || Input.GetKeyDown (KeyCode.Space)) {
-				
-				timingText.text = "Fail";
-				// 判定
-				for (int i = 0; i < GameScript.scores[GameScript.scoreNum].Length; i++) {
-					if (GameScript.scores[GameScript.scoreNum][i] > 0) {
-						float timing = 0;
-						if (i * GameScript.timeForABeat + 0.046875 < timeCounterInABar && timeCounterInABar < i * GameScript.timeForABeat + 0.078125) {
-							point += 500;
-							scoreText.text = "Score: " + point;
-							timing = timeCounterInABar - 0.0625f - i * GameScript.timeForABeat;
-							timingText.text = "Perfect " + timing;
-							tapBeat (Rate.Perfect);
-						} else if (i * GameScript.timeForABeat + 0.03125 < timeCounterInABar && timeCounterInABar < i * GameScript.timeForABeat + 0.09375) {
-							point += 300;
-							scoreText.text = "Score: " + point;
-							timing = timeCounterInABar - 0.0625f - i * GameScript.timeForABeat;
-							timingText.text = "Great " + timing;
-							tapBeat (Rate.Great);
-						} else if (i * GameScript.timeForABeat < timeCounterInABar && timeCounterInABar < i * GameScript.timeForABeat + 0.125) {
-							point += 100;
-							scoreText.text = "Score: " + point;
-							timing = timeCounterInABar - 0.0625f - i * GameScript.timeForABeat;
-							timingText.text = "Good " + timing;
-							tapBeat (Rate.Good);
-						}
-					}
-				}
-				Debug.Log ("tap in Player");
-			}
-
-			if (timeCounterInABar >= 2) {
-				timeCounterInABar -= 2;
-			}
-
-			timeCounterInABar += Time.deltaTime;
-
-		}
-*/
+		
 	}
 
-	void tapBeat(Rate rate) {
-		if (rate == Rate.Model) {
-			audioSource.PlayOneShot (snare);
-		} else if (rate == Rate.Perfect) {
-			audioSource.PlayOneShot (perfectSound);
-			drawRate (rate);
-		} else if (rate == Rate.Great) {
-			audioSource.PlayOneShot (greatSound);
-			drawRate (rate);
-		} else if (rate == Rate.Good) {
-			audioSource.PlayOneShot (goodSound);
-			drawRate (rate);
-		} else if (rate == Rate.Fail) {
-			audioSource.PlayOneShot (failSound);
-		}
-		changeGrapics ();
-		playParticle ();
-	}
-
-	void changeGrapics () {
+	public void changeGrapics () {
 		int randomNum = Random.Range (0,6);
 		if (randomNum <= 1 && svgRenderer.vectorGraphics != player1) {
 			svgRenderer.vectorGraphics = player1;
@@ -139,7 +59,7 @@ public class playerBehavier : MonoBehaviour {
 		}
 	}
 
-	void playParticle () {
+	public void playParticle () {
 		for (int i = 0; i < 8; i++) {
 			GameObject ptcle = Instantiate(particle);
 			ParticleSystemRenderer psr = ptcle.GetComponent<ParticleSystemRenderer>();
@@ -153,18 +73,18 @@ public class playerBehavier : MonoBehaviour {
 		}
 	}
 
-	void drawRate (Rate rate) {
+	public void drawRate (GameScript.Rate rate) {
 		GameObject rateObject = Instantiate (textRate);
 		rateObject.transform.parent = transform;
 		rateObject.GetComponent<Animator> ().SetTrigger ("Success");
-		if (rate == Rate.Perfect) {
+		if (rate == GameScript.Rate.Perfect) {
 			rateObject.GetComponent<SVGRenderer> ().vectorGraphics = perfectRate;
-		} else if (rate == Rate.Great) {
+		} else if (rate == GameScript.Rate.Great) {
 			rateObject.GetComponent<SVGRenderer> ().vectorGraphics = greatRate;
-		} else if (rate == Rate.Good) {
+		} else if (rate == GameScript.Rate.Good) {
 			rateObject.GetComponent<SVGRenderer> ().vectorGraphics = goodRate;
 		}
-		Destroy (rateObject, .5f);
+		Destroy (rateObject, .4f);
 	}
 }
 

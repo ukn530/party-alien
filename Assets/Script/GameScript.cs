@@ -11,7 +11,7 @@ public class GameScript : MonoBehaviour {
 		Idle
 	}
 
-	enum Rate {
+	public enum Rate {
 		Fail,
 		Good,
 		Great,
@@ -19,12 +19,12 @@ public class GameScript : MonoBehaviour {
 	}
 
 	public static State state;
-	Rate rate;
+	public Rate rate;
 
 
 	int[][] scores = new int[][]{
 		new int[] {0,1,0,1,0,1,0,1},
-		new int[] {0,0,1,1,0,0,1,0}, 
+		new int[] {0,0,1,1,0,0,1,0},
 		new int[] {0,1,1,0,1,1,1,0,1,0,1,1},
 		new int[] {0,1,0,1,0,1,1,1}, 
 		new int[] {1,0,1,0,1,1,0,1,1,0,1,0,1,1,0,1},
@@ -58,16 +58,19 @@ public class GameScript : MonoBehaviour {
 	public GameObject iconPlayer;
 	public GameObject score;
 
+	public GameObject player;
+	public GameObject enemy;
 
 	public Text scoreText;
 	public Text timingText;
 	public Text fpsText;
 
-
-	AudioSource audioSource;
-	private AudioSource[] audioSources = new AudioSource[2];
+	private AudioSource[] audioSources = new AudioSource[5];
 	public AudioClip snare;
 	public AudioClip kick;
+	public AudioClip perfect;
+	public AudioClip great;
+	public AudioClip good;
 
 
 	float posIconMoveX;
@@ -83,7 +86,7 @@ public class GameScript : MonoBehaviour {
 		Application.targetFrameRate = 60;
 
 		// 音の設定
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 5; i++) {
 			GameObject child = new GameObject("AudioPlayer");
 			child.transform.parent = gameObject.transform;
 			audioSources[i] = child.AddComponent<AudioSource>();
@@ -91,9 +94,9 @@ public class GameScript : MonoBehaviour {
 
 		audioSources [0].clip = kick;
 		audioSources [1].clip = snare;
-
-		audioSource = GetComponent<AudioSource> ();
-
+		audioSources [2].clip = perfect;
+		audioSources [3].clip = great;
+		audioSources [4].clip = good;
 
 		// リズムの設定
 		beatIndex = 0;
@@ -144,7 +147,6 @@ public class GameScript : MonoBehaviour {
 		if (timeCounterInASong >= timeStompForBar) {
 
 			timeStompForBar += timePerQuarterBeat * 4f;
-			Debug.Log ("timeStompForBar: " + timeStompForBar);
 			
 			if (state == State.Player || state == State.Idle) {
 				state = State.Enemy;
@@ -175,7 +177,6 @@ public class GameScript : MonoBehaviour {
 		if (timeCounterInASong >= timeStompForQuarterBeat) {
 
 			timeStompForQuarterBeat += timePerQuarterBeat;
-			Debug.Log ("timeStompForQuarterBeat: " + timeStompForQuarterBeat);
 
 			audioSources [0].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
 		}
@@ -193,6 +194,8 @@ public class GameScript : MonoBehaviour {
 				if (scores[scoreIndex][beatIndex] > 0) {
 					
 					audioSources [1].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
+					enemy.GetComponent<playerBehavier> ().changeGrapics ();
+					enemy.GetComponent<playerBehavier> ().playParticle ();
 				}
 			}
 
@@ -205,35 +208,40 @@ public class GameScript : MonoBehaviour {
 		if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began || Input.GetMouseButtonDown (0) || Input.GetKeyDown (KeyCode.Space)) {
 
 			Instantiate(noteCircle, iconPlayer.transform.position, Quaternion.identity, noteWrapperPlayer.transform);
-			//checkTiming ();
+			checkTiming ();
 			tapBeat ();
 		}
 	}
-	/*
-	void checkTiming () {
-		if (scores [scoreIndex] [beatIndex] > 0) {
 
-			if (timeStompForBar / 64 < timeCounterInABeat && timeCounterInABeat < 3 * timeStompForBar / 64) {
-				Debug.Log ("Perfect");
+	void checkTiming () {
+		Debug.Log ("timeStompForBeat - 3 * timePerQuarterBeat / 16: " + (timeStompForBeat - 3 * timePerQuarterBeat / 16));
+		Debug.Log ("timeCounterInASong: " + timeCounterInASong);
+
+		if (scores [scoreIndex] [beatIndex-1] > 0) {
+			float startPoint = timeStompForBeat - (timePerQuarterBeat * 4) / scores [scoreIndex].Length;
+			if (startPoint + timePerQuarterBeat / 16 < timeCounterInASong && timeCounterInASong < startPoint + 3 * timePerQuarterBeat / 16) {
+				rate = Rate.Perfect;
 				point += 100;
-				timingText.text = "Perfect " + (timeCounterInABeat - timeStompForBar / 32);
-			} else if (timeStompForBar / 128 < timeCounterInABeat && timeCounterInABeat < 7 * timeStompForBar / 128) {
-				Debug.Log ("Great");
+				audioSources [2].Play ();
+			} else if (startPoint + timePerQuarterBeat / 32 < timeCounterInASong && timeCounterInASong < startPoint + 7 * timePerQuarterBeat / 32) {
+				rate = Rate.Great;
 				point += 50;
-				timingText.text = "Great " + (timeCounterInABeat - timeStompForBar / 32);
+				audioSources [3].Play ();
 			} else {
-				Debug.Log ("Good");
+				rate = Rate.Good;
 				point += 20;
-				timingText.text = "Good " + (timeCounterInABeat - timeStompForBar / 32);
+				audioSources [4].Play ();
 			}
 			scoreText.text = "Score: " + point;
+			timingText.text = "Timing: " + (timeCounterInASong - timeStompForBeat + timePerQuarterBeat / 16);
+			player.GetComponent<playerBehavier> ().drawRate (rate);
 		}
 	}
-*/
+
 	void tapBeat() {
-		audioSource.PlayOneShot (snare);
-		//changeGrapics ();
-		//playParticle ();
+		audioSources [1].Play ();
+		player.GetComponent<playerBehavier> ().changeGrapics ();
+		player.GetComponent<playerBehavier> ().playParticle ();
 	}
 
 
