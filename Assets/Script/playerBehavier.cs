@@ -62,8 +62,9 @@ public class playerBehavier : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-
+		
 		if (GameScript.state == GameScript.State.Player && tag == "Player") {
+			
 			if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began || Input.GetMouseButtonDown (0) || Input.GetKeyDown (KeyCode.Space)) {
 				
 				timingText.text = "Fail";
@@ -92,6 +93,7 @@ public class playerBehavier : MonoBehaviour {
 						}
 					}
 				}
+				Debug.Log ("tap in Player");
 			}
 
 			if (timeCounterInABar >= 2) {
@@ -100,28 +102,7 @@ public class playerBehavier : MonoBehaviour {
 
 			timeCounterInABar += Time.deltaTime;
 		}
-	}
 
-	void FixedUpdate () {
-
-		if (timeCounterInABeat >= 0) {
-			if (GameScript.state == GameScript.State.Enemy && tag == "Enemy") {
-
-				if (GameScript.scores[GameScript.scoreNum][beatCounter] > 0) {
-					tapBeat (Rate.Model);
-				}
-			}
-
-			timeCounterInABeat -= GameScript.beatTime;
-			beatCounter++;
-
-			// scoreNumが変わるタイミングとbeatCounterが変わるタイミングのズレ
-			if (beatCounter == GameScript.scores[GameScript.scoreNum].Length) {
-				beatCounter = 0;
-			}
-		}
-
-		timeCounterInABeat += Time.deltaTime;
 	}
 
 	void tapBeat(Rate rate) {

@@ -3,9 +3,9 @@ guid: 9cb9206bc8c1749f98f48c5c0d620210
 timeCreated: 1489310530
 licenseType: Free
 NativeFormatImporter:
-  userData: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 28 28\"><title>NoteNormal</title><g
+  userData: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 80 80\"><defs><style>.cls-1{fill:#fff;opacity:0.01;}</style></defs><title>NoteNormal</title><g
     id=\"\u30EC\u30A4\u30E4\u30FC_2\" data-name=\"\u30EC\u30A4\u30E4\u30FC 2\"><g
     id=\"\u30EC\u30A4\u30E4\u30FC_1-2\" data-name=\"\u30EC\u30A4\u30E4\u30FC 1\"><circle
-    cx=\"14\" cy=\"14\" r=\"14\"/></g></g></svg>"
+    class=\"cls-1\" cx=\"40\" cy=\"40\" r=\"40\"/><circle cx=\"40\" cy=\"40\" r=\"14\"/></g></g></svg>"
   assetBundleName: 
   assetBundleVariant: 

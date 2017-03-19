@@ -3,9 +3,10 @@ guid: 9622e10bab7a9429cb6376a26184a642
 timeCreated: 1489310530
 licenseType: Free
 NativeFormatImporter:
-  userData: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 52 52\"><title>NoteLoud</title><g
+  userData: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 80 80\"><defs><style>.cls-1{fill:#fff;opacity:0.01;}</style></defs><title>NoteLoud</title><g
     id=\"\u30EC\u30A4\u30E4\u30FC_2\" data-name=\"\u30EC\u30A4\u30E4\u30FC 2\"><g
     id=\"\u30EC\u30A4\u30E4\u30FC_1-2\" data-name=\"\u30EC\u30A4\u30E4\u30FC 1\"><circle
-    cx=\"26\" cy=\"26\" r=\"14\"/><path d=\"M26,4A22,22,0,1,1,4,26,22,22,0,0,1,26,4m0-4A26,26,0,1,0,52,26,26,26,0,0,0,26,0Z\"/></g></g></svg>"
+    class=\"cls-1\" cx=\"40\" cy=\"40\" r=\"40\"/><path d=\"M40,18A22,22,0,1,1,18,40,22,22,0,0,1,40,18m0-4A26,26,0,1,0,66,40,26,26,0,0,0,40,14Z\"/><circle
+    cx=\"40\" cy=\"40\" r=\"14\"/></g></g></svg>"
   assetBundleName: 
   assetBundleVariant: 

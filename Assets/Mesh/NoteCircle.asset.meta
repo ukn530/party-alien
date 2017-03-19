@@ -1,0 +1,11 @@
+fileFormatVersion: 2
+guid: 3c7c5b4f1de704d7bb07bf124a5f2707
+timeCreated: 1489587518
+licenseType: Free
+NativeFormatImporter:
+  userData: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 80 80\"><defs><style>.cls-1{fill:#fff;opacity:0.01;}</style></defs><title>NoteCircle</title><g
+    id=\"\u30EC\u30A4\u30E4\u30FC_2\" data-name=\"\u30EC\u30A4\u30E4\u30FC 2\"><g
+    id=\"\u30EC\u30A4\u30E4\u30FC_1-2\" data-name=\"\u30EC\u30A4\u30E4\u30FC 1\"><circle
+    class=\"cls-1\" cx=\"40\" cy=\"40\" r=\"40\"/><path d=\"M40,18A22,22,0,1,1,18,40,22,22,0,0,1,40,18m0-4A26,26,0,1,0,66,40,26,26,0,0,0,40,14Z\"/></g></g></svg>"
+  assetBundleName: 
+  assetBundleVariant: 

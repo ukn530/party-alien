@@ -13,6 +13,10 @@ public class GameScript : MonoBehaviour {
 	public static State state;
 	public float timeCounter;
 	public float beatTimeCounter;
+	float timeCounterInABeat;
+	int beatCounter = 0;
+	float BPM = 120;
+	float timePerBar;
 
 	public Text fpsText;
 
@@ -21,45 +25,66 @@ public class GameScript : MonoBehaviour {
 	public static int scoreNum; // indexOfScoreとか
 
 	public GameObject noteWrapperEnemy;
+	public GameObject noteWrapperPlayer;
 	public GameObject noteRest;
 	public GameObject noteNormal;
 	public GameObject noteLoud;
+	public GameObject noteCircle;
 	public GameObject iconEnemy;
 	public GameObject iconPlayer;
 	public GameObject score;
 
 	AudioSource audioSource;
+	private AudioSource[] audioSources = new AudioSource[2];
+	public AudioClip snare;
+	public AudioClip kick;
 
 	float posIconMoveX;
 	float posIconMoveToX;
+
+	int paddingOfScore;
 
 	// Use this for initialization
 	void Start () {
 		Application.targetFrameRate = 60;
 
 		scores = new int[][]{
-			new int[] {0,0,1,1,0,0,1,0}, 
-			new int[] {0,0,1,1,0,0,1,0}, 
-			new int[] {0,1,0,1,0,1,1,1}, 
-			new int[] {1,0,1,0,1,1,0,1},
-			new int[] {1,0,1,0,0,1,0,1},
-			new int[] {0,1,0,1,0,1,1,1},
-			new int[] {0,1,0,1,1,1,0,1},
-			new int[] {0,0,1,0,0,0,1,1,0,0,1,1,0,0,1,0}
+			new int[] {0,1,0,1,0,1,0,1},
+//			new int[] {0,0,1,1,0,0,1,0}, 
+//			new int[] {0,0,1,1,0,0,1,0,0,0,1,1,0,0,1,0}, 
+//			new int[] {0,1,0,1,0,1,1,1}, 
+//			new int[] {1,0,1,0,1,1,0,1,1,0,1,0,1,1,0,1},
+//			new int[] {1,0,1,0,0,1,0,1},
+//			new int[] {0,1,0,1,0,1,1,1,0,1,0,1,0,1,1,1},
+//			new int[] {0,1,0,1,1,1,0,1},
+//			new int[] {0,0,1,0,0,0,1,1,0,0,1,1,0,0,1,0}
 		};
 
+		int i = 0;
+		while (i < 2) {
+			GameObject child = new GameObject("AudioPlayer");
+			child.transform.parent = gameObject.transform;
+			audioSources[i] = child.AddComponent<AudioSource>();
+			i++;
+		}
+
+		audioSources [0].clip = kick;
+		audioSources [1].clip = snare;
 
 		timeCounter = 0;
 		beatTimeCounter = 0;
 
+
 		scoreNum = 0;
-		beatTime = 2.0f / GameScript.scores [scoreNum].Length;
+		timePerBar = 60 * 4 / BPM;
+		beatTime = timePerBar / scores [scoreNum].Length;
+
+		drawScore ();
+
+		calcPositionForIcon ();
 
 		iconEnemy.transform.position = new Vector3(posIconMoveX, iconEnemy.transform.position.y);
 		iconPlayer.transform.position = new Vector3(posIconMoveX, iconPlayer.transform.position.y);
-		calcPositionForIcon ();
-
-		DrawScore ();
 
 		audioSource = GetComponent<AudioSource> ();
 
@@ -68,51 +93,116 @@ public class GameScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		//Debug.Log(state);
-		timeCounter += Time.deltaTime;
-		fpsText.text = 1f / Time.deltaTime + "fps";
-
-		if (timeCounter > 2) {
-			timeCounter -= 2f;
-			if (state == State.Player) {
-				scoreNum = Random.Range(0, scores.Length);
-				beatTime = 2.0f / scores[scoreNum].Length;
-				state = State.Enemy;
-				DrawScore ();
-				iconEnemy.transform.position = new Vector3(posIconMoveX, iconEnemy.transform.position.y);
-			} else {
-				state = State.Player;
-				iconPlayer.transform.position = new Vector3(posIconMoveX, iconPlayer.transform.position.y);
-			}
-		}
 
 		if (state == State.Enemy) {
-			// 1フレームでどれだけ進めばいいか。
-			// かかるフレーム数にdeltaTimeをかける
-			// (100 - 10)をbeatTime*scores[scoreNum].Length秒で進めばいい
-			iconPlayer.SetActive(false);
-			iconEnemy.SetActive (true);
+
 			iconEnemy.transform.Translate (Vector3.right * Time.deltaTime * (posIconMoveToX - posIconMoveX) / 2);
+
 		} else if (state == State.Player) {
-			iconEnemy.SetActive (false);
-			iconPlayer.SetActive (true);
+
 			iconPlayer.transform.Translate (Vector3.right * Time.deltaTime * (posIconMoveToX - posIconMoveX) / 2);
+			onTap ();
 		}
+
+		fpsText.text = 1f / Time.deltaTime + "fps";
+
+
+		eachABar ();
+		eachABeat ();
+		eachANote ();
 	}
 
 	void FixedUpdate () {
-		beatTimeCounter += Time.deltaTime;
+	}
 
-		if (beatTimeCounter > 0.5) {
-			audioSource.Play ();
-			beatTimeCounter -= 0.5f;
+	void onTap () {
+		if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began || Input.GetMouseButtonDown (0) || Input.GetKeyDown (KeyCode.Space)) {
+			
+			Instantiate(noteCircle, iconPlayer.transform.position, Quaternion.identity, noteWrapperPlayer.transform);
+			tapBeat ();
+
+
 		}
 	}
 
-	void DrawScore () {
+
+	void eachABar () {
+
+		// 1小節ごとに呼ぶ
+		if (timeCounter > timePerBar) {
+			if (state == State.Player) {
+				scoreNum = Random.Range(0, scores.Length);
+				beatTime = timePerBar / scores[scoreNum].Length;
+				state = State.Enemy;
+				drawScore ();
+				iconEnemy.transform.position = new Vector3(posIconMoveX, iconEnemy.transform.position.y);
+
+				iconPlayer.SetActive(false);
+				iconEnemy.SetActive (true);
+			} else {
+				state = State.Player;
+				iconPlayer.transform.position = new Vector3(posIconMoveX, iconPlayer.transform.position.y);
+
+				iconEnemy.SetActive (false);
+				iconPlayer.SetActive (true);
+			}
+			timeCounter -= timePerBar;
+		}
+
+		timeCounter += Time.deltaTime;
+	}
+
+	void eachABeat () {
+
+		// 1拍ごと
+		if (beatTimeCounter >= 0) {
+			audioSources [0].PlayScheduled (AudioSettings.dspTime + timePerBar / 32);
+			beatTimeCounter -= timePerBar/4;
+		}
+		beatTimeCounter += Time.deltaTime;
+	}
+
+
+	void eachANote () {
+
+		// 1音符ごと
+		if (timeCounterInABeat >= 0) {
+
+			if (state == State.Enemy) {
+
+				if (scores[scoreNum][beatCounter] > 0) {
+					audioSources [1].PlayScheduled (AudioSettings.dspTime + timePerBar / 32);
+				}
+			}
+
+			beatCounter++;
+
+			if (beatCounter == scores[scoreNum].Length) {
+				beatCounter = 0;
+			}
+
+			timeCounterInABeat -= beatTime;
+		}
+
+		timeCounterInABeat += Time.deltaTime;
+	}
+
+
+	void tapBeat() {
+		audioSource.PlayOneShot (snare);
+		//changeGrapics ();
+		//playParticle ();
+	}
+
+
+	void drawScore () {
 		
 		// スコアを削除 
 		foreach ( Transform n in noteWrapperEnemy.transform ) {
+			GameObject.Destroy(n.gameObject);
+		}
+
+		foreach ( Transform n in noteWrapperPlayer.transform ) {
 			GameObject.Destroy(n.gameObject);
 		}
 
@@ -131,15 +221,18 @@ public class GameScript : MonoBehaviour {
 
 			}
 		}
+
+		foreach ( Transform n in noteWrapperEnemy.transform ) {
+			n.GetComponent<RectTransform> ().localScale = Vector3.one;
+		}
 	}
 
-	void initIcon () {
-		
-	}
 
 	void calcPositionForIcon () {
+
 		posIconMoveX = noteWrapperEnemy.transform.GetChild (0).transform.position.x;
 		float intervalIconMoveX = noteWrapperEnemy.transform.GetChild (1).transform.position.x - posIconMoveX;
-		posIconMoveToX = noteWrapperEnemy.transform.GetChild (scores [scoreNum].Length - 1).transform.position.x + intervalIconMoveX;
+		posIconMoveX -= intervalIconMoveX / 4; 
+		posIconMoveToX = posIconMoveX + scores [scoreNum].Length * intervalIconMoveX;
 	}
 }
