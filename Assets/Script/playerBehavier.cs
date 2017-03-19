@@ -11,8 +11,8 @@ public class playerBehavier : MonoBehaviour {
 	public SVGAsset player1, player2, player3, player4, player5, player6;
 	public Mesh p1, p2, p3, p4, p5, p6, p7, p8;
 
-	public Text scoreText;
-	public Text timingText;
+//	public Text scoreText;
+//	public Text timingText;
 
 	AudioSource audioSource;
 	public AudioClip snare;
@@ -23,17 +23,15 @@ public class playerBehavier : MonoBehaviour {
 
 
 	bool tapped;
-	float timeCounterInABeat;
-	float timeCounterInABar;
-	int beatCounter;
-	int point;
+//	float timeCounterInABar;
+//	int point;
 
 	public GameObject textRate;
 	public SVGAsset goodRate;
 	public SVGAsset greatRate;
 	public SVGAsset perfectRate;
 
-	 enum Rate {
+	enum Rate {
 		Fail,
 		Good,
 		Great,
@@ -50,19 +48,16 @@ public class playerBehavier : MonoBehaviour {
 		svgRenderer = gameObject.GetComponent<SVGRenderer> ();
 
 		meshs = new Mesh[] {p1, p2, p3, p4, p5, p6, p7, p8};
+//		timeCounterInABar = 0.0625f;
 
-		timeCounterInABeat = 0;
-		timeCounterInABar = 0.0625f;
-		beatCounter = 0;
-
-		point = 0;
+//		point = 0;
 
 		audioSource = GetComponent<AudioSource> ();
 	}
 
 	// Update is called once per frame
 	void Update () {
-		
+		/*
 		if (GameScript.state == GameScript.State.Player && tag == "Player") {
 			
 			if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began || Input.GetMouseButtonDown (0) || Input.GetKeyDown (KeyCode.Space)) {
@@ -72,22 +67,22 @@ public class playerBehavier : MonoBehaviour {
 				for (int i = 0; i < GameScript.scores[GameScript.scoreNum].Length; i++) {
 					if (GameScript.scores[GameScript.scoreNum][i] > 0) {
 						float timing = 0;
-						if (i * GameScript.beatTime + 0.046875 < timeCounterInABar && timeCounterInABar < i * GameScript.beatTime + 0.078125) {
+						if (i * GameScript.timeForABeat + 0.046875 < timeCounterInABar && timeCounterInABar < i * GameScript.timeForABeat + 0.078125) {
 							point += 500;
 							scoreText.text = "Score: " + point;
-							timing = timeCounterInABar - 0.0625f - i * GameScript.beatTime;
+							timing = timeCounterInABar - 0.0625f - i * GameScript.timeForABeat;
 							timingText.text = "Perfect " + timing;
 							tapBeat (Rate.Perfect);
-						} else if (i * GameScript.beatTime + 0.03125 < timeCounterInABar && timeCounterInABar < i * GameScript.beatTime + 0.09375) {
+						} else if (i * GameScript.timeForABeat + 0.03125 < timeCounterInABar && timeCounterInABar < i * GameScript.timeForABeat + 0.09375) {
 							point += 300;
 							scoreText.text = "Score: " + point;
-							timing = timeCounterInABar - 0.0625f - i * GameScript.beatTime;
+							timing = timeCounterInABar - 0.0625f - i * GameScript.timeForABeat;
 							timingText.text = "Great " + timing;
 							tapBeat (Rate.Great);
-						} else if (i * GameScript.beatTime < timeCounterInABar && timeCounterInABar < i * GameScript.beatTime + 0.125) {
+						} else if (i * GameScript.timeForABeat < timeCounterInABar && timeCounterInABar < i * GameScript.timeForABeat + 0.125) {
 							point += 100;
 							scoreText.text = "Score: " + point;
-							timing = timeCounterInABar - 0.0625f - i * GameScript.beatTime;
+							timing = timeCounterInABar - 0.0625f - i * GameScript.timeForABeat;
 							timingText.text = "Good " + timing;
 							tapBeat (Rate.Good);
 						}
@@ -101,8 +96,9 @@ public class playerBehavier : MonoBehaviour {
 			}
 
 			timeCounterInABar += Time.deltaTime;
-		}
 
+		}
+*/
 	}
 
 	void tapBeat(Rate rate) {
