@@ -64,6 +64,7 @@ public class GameScript : MonoBehaviour {
 	public Text scoreText;
 	public Text timingText;
 	public Text fpsText;
+	public Text bpmText;
 	public GameObject resultBoard;
 	public Text resultScoreText;
 	public GameObject buttonRestart;
@@ -320,6 +321,11 @@ public class GameScript : MonoBehaviour {
 		resultBoard.SetActive (false);
 		state = State.Player;
 		init ();
+	}
+
+	public void onSlide (float value) {
+		BPM = value;
+		bpmText.text = "BPM: " + value;
 	}
 }
 
