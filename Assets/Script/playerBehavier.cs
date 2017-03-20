@@ -16,16 +16,6 @@ public class playerBehavier : MonoBehaviour {
 	public SVGAsset greatRate;
 	public SVGAsset perfectRate;
 
-	enum Rate {
-		Fail,
-		Good,
-		Great,
-		Perfect,
-		Model
-	}
-
-	Rate rate;
-
 	Mesh[] meshs;
 
 	// Use this for initialization
@@ -38,6 +28,10 @@ public class playerBehavier : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		
+	}
+
+	public void playBaseRhythm () {
+		GetComponent<Animator> ().SetTrigger ("kick");
 	}
 
 	public void changeGrapics () {
