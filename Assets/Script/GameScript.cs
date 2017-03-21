@@ -46,7 +46,7 @@ public class GameScript : MonoBehaviour {
 	int turnIndex;
 	int beatIndex;
 	int scoreIndex;
-
+	float timeFromLastTap;
 
 	public GameObject noteWrapperEnemy;
 	public GameObject noteWrapperPlayer;
@@ -76,6 +76,8 @@ public class GameScript : MonoBehaviour {
 	public AudioClip great;
 	public AudioClip good;
 
+	public GameObject mic;
+
 
 	float posIconMoveX;
 	float posIconMoveToX;
@@ -102,6 +104,11 @@ public class GameScript : MonoBehaviour {
 		audioSources [3].clip = great;
 		audioSources [4].clip = good;
 
+		mic.GetComponent<AudioSource> ().clip = Microphone.Start(null, true, 10, 44100);
+		mic.GetComponent<AudioSource> ().loop = true;
+		while (!(Microphone.GetPosition(null) > 0)){}
+		mic.GetComponent<AudioSource> ().Play();
+
 
 		BPM = 112.5f;
 
@@ -113,6 +120,10 @@ public class GameScript : MonoBehaviour {
 		calcPositionForIcon ();
 
 		init ();
+
+		foreach (string device in Microphone.devices) {
+			Debug.Log("Name: " + device);
+		}
 	}
 
 	void init () {
@@ -134,6 +145,8 @@ public class GameScript : MonoBehaviour {
 		iconPlayer.transform.position = new Vector3(0, iconPlayer.transform.position.y);
 
 		scoreText.text = "Score: " + 0;
+
+		timeFromLastTap = timePerQuarterBeat / 5;
 	}
 	
 	// Update is called once per frame
@@ -157,6 +170,7 @@ public class GameScript : MonoBehaviour {
 			timeCounterInASong += Time.deltaTime;
 		}
 
+
 		fpsText.text = 1f / Time.deltaTime + "fps";
 	}
 
@@ -171,9 +185,7 @@ public class GameScript : MonoBehaviour {
 				state = State.Enemy;
 
 				if (turnIndex == 8) {
-					state = State.Idle;
-					resultBoard.SetActive (true);
-					return;
+					stopMusic ();
 				}
 
 				turnIndex++;
@@ -222,7 +234,6 @@ public class GameScript : MonoBehaviour {
 			timeStompForBeat += (timePerQuarterBeat * 4) / scores[scoreIndex].Length;
 
 			if (state == State.Enemy) {
-				
 				if (scores[scoreIndex][beatIndex] > 0) {
 					
 					audioSources [1].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
@@ -237,11 +248,16 @@ public class GameScript : MonoBehaviour {
 
 
 	void onTap () {
-		if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began || Input.GetMouseButtonDown (0) || Input.GetKeyDown (KeyCode.Space)) {
+		timeFromLastTap += Time.deltaTime;
+		float vol = GetAveragedVolume();
+		if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began || Input.GetMouseButtonDown (0) || Input.GetKeyDown (KeyCode.Space) || vol > 0.04f) {
 
-			Instantiate(noteCircle, iconPlayer.transform.position, Quaternion.identity, noteWrapperPlayer.transform);
-			checkTiming ();
-			tapBeat ();
+			if (timeFromLastTap > timePerQuarterBeat / 5) {
+				timeFromLastTap = 0;
+				Instantiate(noteCircle, iconPlayer.transform.position, Quaternion.identity, noteWrapperPlayer.transform);
+				checkTiming ();
+				tapBeat ();
+			}
 		}
 	}
 
@@ -317,15 +333,44 @@ public class GameScript : MonoBehaviour {
 		posIconMoveToX = posIconMoveX + scores [scoreIndex].Length * intervalIconMoveX;
 	}
 
+	float GetAveragedVolume () { 
+		float[] data = new float[256];
+		float a = 0;
+		mic.GetComponent<AudioSource> ().GetOutputData(data,0);
+		foreach(float s in data)
+		{
+			a += Mathf.Abs(s);
+		}
+		return a/256.0f;
+	}
+
+
 	public void onClick () {
+		
 		resultBoard.SetActive (false);
 		state = State.Player;
 		init ();
 	}
 
 	public void onSlide (float value) {
+		
 		BPM = value;
 		bpmText.text = "BPM: " + value;
+	}
+
+	public void stopMusic() {
+
+		state = State.Idle;
+		resultBoard.SetActive (true);
+		return;
+	}
+
+	public void micToggle (bool value) {
+		if (value) {
+			mic.GetComponent<AudioSource> ().Play ();
+		} else {
+			mic.GetComponent<AudioSource> ().Stop ();
+		}
 	}
 }
 
