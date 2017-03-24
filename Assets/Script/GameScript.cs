@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Runtime.InteropServices;
+using System;
 
 public class GameScript : MonoBehaviour {
 
@@ -76,8 +78,6 @@ public class GameScript : MonoBehaviour {
 	public AudioClip great;
 	public AudioClip good;
 
-	public GameObject mic;
-
 
 	float posIconMoveX;
 	float posIconMoveToX;
@@ -86,6 +86,46 @@ public class GameScript : MonoBehaviour {
 	int paddingOfScore;
 	int point;
 
+	bool isActiveMic = false;
+
+	#if UNITY_EDITOR
+	#elif UNITY_IOS
+
+	static IntPtr audioInput;
+
+	[DllImport("__Internal")]
+	private static extern IntPtr audioInputInit();
+
+	[DllImport("__Internal")]
+	private static extern void setupAudio(IntPtr audioInput);
+
+	[DllImport("__Internal")]
+	private static extern float getAudioVolume(IntPtr audioInput);
+
+	[DllImport("__Internal")]
+	private static extern void stopVolume(IntPtr audioInput);
+
+	[DllImport("__Internal")]
+	private static extern void cfRelease(IntPtr audioInput);
+
+	private static void setupMic() {
+		Debug.Log ("defined setupMic");
+		audioInput = audioInputInit ();
+		setupAudio (audioInput);
+	}
+
+	private static float getAudioVolume() {
+
+		Debug.Log ("defined getAudioVolume");
+		return getAudioVolume (audioInput);
+	}
+
+	private static void stopMic() {
+		stopVolume (audioInput);
+		cfRelease (audioInput);
+	}
+
+	#endif
 
 	// Use this for initialization
 	void Start () {
@@ -104,26 +144,15 @@ public class GameScript : MonoBehaviour {
 		audioSources [3].clip = great;
 		audioSources [4].clip = good;
 
-		mic.GetComponent<AudioSource> ().clip = Microphone.Start(null, true, 10, 44100);
-		mic.GetComponent<AudioSource> ().loop = true;
-		while (!(Microphone.GetPosition(null) > 0)){}
-		mic.GetComponent<AudioSource> ().Play();
-
-
 		BPM = 112.5f;
 
 		state = State.Idle;
-
 
 		// スコアの表示
 		drawScore ();
 		calcPositionForIcon ();
 
 		init ();
-
-		foreach (string device in Microphone.devices) {
-			Debug.Log("Name: " + device);
-		}
 	}
 
 	void init () {
@@ -249,8 +278,15 @@ public class GameScript : MonoBehaviour {
 
 	void onTap () {
 		timeFromLastTap += Time.deltaTime;
-		float vol = GetAveragedVolume();
-		if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began || Input.GetMouseButtonDown (0) || Input.GetKeyDown (KeyCode.Space) || vol > 0.04f) {
+		float vol = 0;
+
+		if (isActiveMic) {
+			#if UNITY_EDITOR
+			#elif UNITY_IOS
+			vol = getAudioVolume();
+			#endif
+		}
+		if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began || Input.GetMouseButtonDown (0) || Input.GetKeyDown (KeyCode.Space) || vol > 0.4) {
 
 			if (timeFromLastTap > timePerQuarterBeat / 5) {
 				timeFromLastTap = 0;
@@ -333,19 +369,13 @@ public class GameScript : MonoBehaviour {
 		posIconMoveToX = posIconMoveX + scores [scoreIndex].Length * intervalIconMoveX;
 	}
 
-	float GetAveragedVolume () { 
-		float[] data = new float[256];
-		float a = 0;
-		mic.GetComponent<AudioSource> ().GetOutputData(data,0);
-		foreach(float s in data)
-		{
-			a += Mathf.Abs(s);
-		}
-		return a/256.0f;
-	}
-
 
 	public void onClick () {
+		#if UNITY_EDITOR
+		Debug.Log("editor");
+		#elif UNITY_IOS
+		Debug.Log("ios");
+		#endif
 		
 		resultBoard.SetActive (false);
 		state = State.Player;
@@ -365,12 +395,18 @@ public class GameScript : MonoBehaviour {
 		return;
 	}
 
-	public void micToggle (bool value) {
-		if (value) {
-			mic.GetComponent<AudioSource> ().Play ();
+	public void onValueChanged (bool value) {
+		isActiveMic = value;
+		#if UNITY_EDITOR
+		#elif UNITY_IOS
+		if (isActiveMic) {
+
+			setupMic ();
 		} else {
-			mic.GetComponent<AudioSource> ().Stop ();
+
+			stopMic ();
 		}
+		#endif
 	}
 }
 
