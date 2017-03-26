@@ -35,7 +35,6 @@ public class GameScript : MonoBehaviour {
 		new int[] {0,1,0,1,0,1,1,1,0,1,0,1,0,1,1,1}
 	};
 
-
 	float BPM;
 
 	float timeCounterInASong;
@@ -71,12 +70,14 @@ public class GameScript : MonoBehaviour {
 	public Text resultScoreText;
 	public GameObject buttonRestart;
 
-	private AudioSource[] audioSources = new AudioSource[5];
+	private AudioSource[] audioSources = new AudioSource[6];
 	public AudioClip snare;
 	public AudioClip kick;
 	public AudioClip perfect;
 	public AudioClip great;
 	public AudioClip good;
+
+	public AudioClip driverslisence;
 
 
 	float posIconMoveX;
@@ -100,6 +101,9 @@ public class GameScript : MonoBehaviour {
 	private static extern void setupAudio(IntPtr audioInput);
 
 	[DllImport("__Internal")]
+	private static extern void setupSession(IntPtr audioInput);
+
+	[DllImport("__Internal")]
 	private static extern float getAudioVolume(IntPtr audioInput);
 
 	[DllImport("__Internal")]
@@ -108,9 +112,13 @@ public class GameScript : MonoBehaviour {
 	[DllImport("__Internal")]
 	private static extern void cfRelease(IntPtr audioInput);
 
-	private static void setupMic() {
-		Debug.Log ("defined setupMic");
+
+	private static void setupAudioSession() {
 		audioInput = audioInputInit ();
+		setupSession (audioInput);
+	}
+
+	private static void setupMic() {
 		setupAudio (audioInput);
 	}
 
@@ -132,7 +140,7 @@ public class GameScript : MonoBehaviour {
 		Application.targetFrameRate = 60;
 
 		// 音の設定
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 6; i++) {
 			GameObject child = new GameObject("AudioPlayer");
 			child.transform.parent = gameObject.transform;
 			audioSources[i] = child.AddComponent<AudioSource>();
@@ -144,7 +152,9 @@ public class GameScript : MonoBehaviour {
 		audioSources [3].clip = great;
 		audioSources [4].clip = good;
 
-		BPM = 112.5f;
+		audioSources [5].clip = driverslisence;
+
+		BPM = 107.3f;
 
 		state = State.Idle;
 
@@ -176,6 +186,11 @@ public class GameScript : MonoBehaviour {
 		scoreText.text = "Score: " + 0;
 
 		timeFromLastTap = timePerQuarterBeat / 5;
+
+		#if UNITY_EDITOR
+		#elif UNITY_IOS
+		setupAudioSession ();
+		#endif
 	}
 	
 	// Update is called once per frame
@@ -215,6 +230,7 @@ public class GameScript : MonoBehaviour {
 
 				if (turnIndex == 8) {
 					stopMusic ();
+					return;
 				}
 
 				turnIndex++;
@@ -371,14 +387,10 @@ public class GameScript : MonoBehaviour {
 
 
 	public void onClick () {
-		#if UNITY_EDITOR
-		Debug.Log("editor");
-		#elif UNITY_IOS
-		Debug.Log("ios");
-		#endif
 		
 		resultBoard.SetActive (false);
 		state = State.Player;
+		audioSources [5].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
 		init ();
 	}
 
@@ -396,6 +408,7 @@ public class GameScript : MonoBehaviour {
 	}
 
 	public void onValueChanged (bool value) {
+		Debug.Log (value);
 		isActiveMic = value;
 		#if UNITY_EDITOR
 		#elif UNITY_IOS
