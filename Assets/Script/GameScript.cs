@@ -387,6 +387,7 @@ public class GameScript : MonoBehaviour {
 		audioSources [1].Play ();
 		player.GetComponent<playerBehavier> ().changeGrapics ();
 		player.GetComponent<playerBehavier> ().playParticle ();
+		player.GetComponent<playerBehavier> ().shakeGraphic ();
 	}
 
 

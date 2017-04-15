@@ -27,11 +27,23 @@ public class playerBehavier : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		
+
+		Mesh mesh = GetComponent<MeshFilter>().mesh;
+		Vector3[] vertices = mesh.vertices;
+		int i = 0;
+		while (i < vertices.Length) {
+			vertices[i] += Vector3.one * Random.Range(-10, 10);
+			i++;
+		}
+		mesh.vertices = vertices;
+		mesh.RecalculateBounds();
 	}
 
 	public void playBaseRhythm () {
 		GetComponent<Animator> ().SetTrigger ("kick");
+	}
+
+	public void shakeGraphic () {
 	}
 
 	public void changeGrapics () {
