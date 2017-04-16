@@ -9,9 +9,8 @@ public class BoneSpring : MonoBehaviour
 	Vector3 velocityVector;
 	Vector3 forceVector;
 	Vector3 positionBefore;
-	float friction = 0.4f;
-	float springiness = 0.2f;
-	float mass = 0.1f; 
+	public float friction = 0.3f;
+	float mass = 0.2f; 
 //	float distance;
 
 	void Start() {
@@ -30,9 +29,9 @@ public class BoneSpring : MonoBehaviour
 		expectedPosition = transform.parent.position + expectedVector;
 		Vector3 force = expectedPosition - positionBefore; //摩擦0で進むべき距離
 
-		velocityVector += force * friction * mass;
+//		velocityVector += force * friction * mass;
 
-		transform.position = positionBefore + (force - force * friction) + velocityVector;
+		transform.position = positionBefore + (force - force * friction) + velocityVector + Vector3.down * 0.1f * mass;;
 		/*
 		addForce(force);
 
