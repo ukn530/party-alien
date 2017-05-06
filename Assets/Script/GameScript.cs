@@ -104,7 +104,7 @@ public class GameScript : MonoBehaviour {
 	public AudioClip great;
 	public AudioClip good;
 
-	public AudioClip driverslisence;
+	public AudioClip bgm;
 
 
 	float posIconMoveX;
@@ -177,9 +177,9 @@ public class GameScript : MonoBehaviour {
 		audioSources [3].clip = great;
 		audioSources [4].clip = good;
 
-		audioSources [5].clip = driverslisence;
+		audioSources [5].clip = bgm;
 
-		BPM = 107.2f;
+		BPM = 120f;
 
 		state = State.Stop;
 
@@ -329,8 +329,8 @@ public class GameScript : MonoBehaviour {
 				if (scores[scoreIndex][beatIndex] > 0) {
 					
 					audioSources [1].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
-					enemy.GetComponent<playerBehavier> ().changeGrapics ();
-					enemy.GetComponent<playerBehavier> ().playParticle ();
+//					enemy.GetComponent<playerBehavier> ().changeGrapics ();
+//					enemy.GetComponent<playerBehavier> ().playParticle ();
 				}
 			}
 
@@ -385,9 +385,9 @@ public class GameScript : MonoBehaviour {
 
 	void tapBeat() {
 		audioSources [1].Play ();
-		player.GetComponent<playerBehavier> ().changeGrapics ();
-		player.GetComponent<playerBehavier> ().playParticle ();
-		player.GetComponent<playerBehavier> ().shakeGraphic ();
+//		player.GetComponent<playerBehavier> ().changeGrapics ();
+//		player.GetComponent<playerBehavier> ().playParticle ();
+//		player.GetComponent<playerBehavier> ().shakeGraphic ();
 	}
 
 
@@ -455,7 +455,12 @@ public class GameScript : MonoBehaviour {
 	public void onClick () {
 		
 		resultBoard.SetActive (false);
-		audioSources [5].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);//ほうんとうは8だが音源が遅くて16
+		audioSources [5].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
+
+		player.GetComponent<playerBehavier> ().playStartAnimation ();
+		enemy.GetComponent<playerBehavier> ().playStartAnimation ();
+		Camera.main.GetComponent<CameraBehavior> ().playStartAnimation ();
+
 		init ();
 		state = State.Idle;
 	}
@@ -472,6 +477,31 @@ public class GameScript : MonoBehaviour {
 		audioSources [5].Stop ();
 		resultBoard.SetActive (true);
 		return;
+	}
+
+	public void onTapPlayPauseButton (GameObject button) {
+		GameObject iconPause = button.transform.FindChild("IconPause").gameObject;
+		GameObject iconPlay = button.transform.FindChild("IconPlay").gameObject;
+		if (iconPlay.active) {
+			iconPlay.SetActive (false);
+			iconPause.SetActive (true);
+
+			audioSources [5].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
+
+			player.GetComponent<playerBehavier> ().playStartAnimation ();
+			enemy.GetComponent<playerBehavier> ().playStartAnimation ();
+			Camera.main.GetComponent<CameraBehavior> ().playStartAnimation ();
+
+			init ();
+			state = State.Idle;
+		} else {
+			iconPlay.SetActive (true);
+			iconPause.SetActive (false);
+
+			state = State.Stop;
+			audioSources [5].Stop ();
+			resultBoard.SetActive (true);
+		}
 	}
 
 	public void onValueChanged (bool value) {
