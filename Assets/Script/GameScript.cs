@@ -26,12 +26,12 @@ public class GameScript : MonoBehaviour {
 
 
 	int[][] scores = new int[][]{
-		new int[] {8},
-		new int[] {4,1,0,1,1,0,1,1,0}, 
-		new int[] {4,1,0,1,0,1,1,1,0},
-		new int[] {4,1,0,1,0,0,1,1,0},
-		new int[] {4,1,0,1,0,0,1,1,0},
-		new int[] {4,1,0,1,0,0,1,1,0},
+		new int[] {16},
+		new int[] {4,315,0,225,180,0,270,360,0}, 
+		new int[] {4,180,0,270,0,360,90,360,90},
+		new int[] {4,135,0,225,0,0,315,45,0},
+		new int[] {4,270,0,180,0,0,270,360,0},
+		new int[] {4,90,0,360,0,0,90,180,0},
 		new int[] {8},
 		new int[] {2,1,0,1,1},
 		new int[] {2,1,0,1,1},
@@ -73,6 +73,7 @@ public class GameScript : MonoBehaviour {
 	int turnIndex;
 	int beatIndex;
 	int scoreIndex;
+	int noteIndex;
 	float timeFromLastTap;
 
 	public GameObject noteWrapperEnemy;
@@ -88,14 +89,7 @@ public class GameScript : MonoBehaviour {
 
 	public GameObject player;
 	public GameObject enemy;
-
-	public Text scoreText;
-	public Text timingText;
 	public Text fpsText;
-	public Text bpmText;
-	public GameObject resultBoard;
-	public Text resultScoreText;
-	public GameObject buttonRestart;
 
 	private AudioSource[] audioSources = new AudioSource[6];
 	public AudioClip snare;
@@ -106,6 +100,7 @@ public class GameScript : MonoBehaviour {
 
 	public AudioClip bgm;
 
+	float[,] motionAngleAndDistance;
 
 	float posIconMoveX;
 	float posIconMoveToX;
@@ -183,9 +178,6 @@ public class GameScript : MonoBehaviour {
 
 		state = State.Stop;
 
-		// スコアの表示
-		//		drawScore ();
-
 		init ();
 	}
 
@@ -206,8 +198,6 @@ public class GameScript : MonoBehaviour {
 
 		iconEnemy.transform.position = new Vector3(0, iconEnemy.transform.position.y);
 		iconPlayer.transform.position = new Vector3(0, iconPlayer.transform.position.y);
-
-		scoreText.text = "Score: " + 0;
 
 		timeFromLastTap = timePerQuarterBeat / 5;
 
@@ -246,43 +236,43 @@ public class GameScript : MonoBehaviour {
 
 
 	void eachABar () {
-		// 1小節ごとに1回呼ぶ
+		// 1ターンごとに1回呼ぶ
 		if (timeCounterInASong >= timeStompForBar) {
+			// 休憩中の場合
 			if (scores [scoreIndex + 1].Length == 1 && state != State.Enemy) {
 				state = State.Idle;
 				scoreIndex++;
 				score.SetActive (false);
 
 				turnIndex++;
-				timingText.text = "Turn: " + turnIndex + "/" + scores.Length;
 
 				iconEnemy.transform.position = new Vector3 (posIconMoveX, iconEnemy.transform.position.y);
 
 				iconPlayer.SetActive (false);
 				iconEnemy.SetActive (false);
-
+			// バトル中の場合
 			} else {
 				score.SetActive (true);
+				// 敵のターン中の処理
 				if (state == State.Player || state == State.Idle) {
-//					Debug.Log ("scoreIndex/beatIndex: " + scoreIndex + " / " + beatIndex);
 					state = State.Enemy;
 					if (turnIndex == scores.Length) {
 						stopMusic ();
 						return;
 					}
-
+					noteIndex = 0;
 					scoreIndex++;
-					//				scoreIndex = Random.Range(0, scores.Length);
 					drawScore ();
+					defineCharactersMotionInATurn ();
 
 					turnIndex++;
-					timingText.text = "Turn: " + turnIndex + "/" + scores.Length;
 
 					iconEnemy.transform.position = new Vector3 (posIconMoveX, iconEnemy.transform.position.y);
 
 					iconPlayer.SetActive (false);
 					iconEnemy.SetActive (true);
 
+				// プレイヤーのターン中の処理
 				} else if (state == State.Enemy) {
 					state = State.Player;
 
@@ -329,8 +319,10 @@ public class GameScript : MonoBehaviour {
 				if (scores[scoreIndex][beatIndex] > 0) {
 					
 					audioSources [1].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
-//					enemy.GetComponent<playerBehavier> ().changeGrapics ();
-//					enemy.GetComponent<playerBehavier> ().playParticle ();
+					float[] angleAndDistance = { motionAngleAndDistance [noteIndex, 0], motionAngleAndDistance [noteIndex, 1] };
+					enemy.GetComponent<playerBehavier> ().translateCharacter (angleAndDistance);
+					enemy.GetComponent<playerBehavier> ().playParticle ();
+					noteIndex++;
 				}
 			}
 
@@ -377,19 +369,59 @@ public class GameScript : MonoBehaviour {
 				point += 20;
 				audioSources [4].Play ();
 			}
-			scoreText.text = "Score: " + point;
-			resultScoreText.text = "" + point;
 			player.GetComponent<playerBehavier> ().drawRate (rate);
 		}
 	}
 
 	void tapBeat() {
 		audioSources [1].Play ();
-//		player.GetComponent<playerBehavier> ().changeGrapics ();
-//		player.GetComponent<playerBehavier> ().playParticle ();
+//		player.GetComponent<playerBehavier> ().translateCharacter ();
+		player.GetComponent<playerBehavier> ().playParticle ();
 //		player.GetComponent<playerBehavier> ().shakeGraphic ();
 	}
 
+	void defineCharactersMotionInATurn () {
+		// 角度と距離の多次元配列を作るために、動く回数を求める
+		int beatCounter = 0;
+		for (int i = 1; i < scores[scoreIndex].Length; i++) {
+			if (scores [scoreIndex] [i] > 0) {
+				beatCounter++;
+			}
+		}
+		// 動く回数 x 2(角度と距離)の多次元配列を定義
+		motionAngleAndDistance = new float[beatCounter, 2];
+
+		beatCounter = 0;
+		for (int i = 1; i < scores[scoreIndex].Length; i++) {
+			if (scores [scoreIndex] [i] > 0) {
+
+				// 各動きの角度を入れる
+				motionAngleAndDistance [beatCounter, 0] = scores[scoreIndex][i];
+
+				// 各動きの距離を入れる
+				float distance = 0;
+				bool flag = true;
+				for (int j = i+1; j < scores[scoreIndex].Length; j++) {
+					if (scores [scoreIndex] [j] > 0 && flag){
+						distance = j - i;
+						flag = false;
+					} else if (j == scores [scoreIndex].Length-1 && flag) {
+						distance = j - i + 1;
+						flag = false;
+					}
+				}
+
+				if (i == scores [scoreIndex].Length-1) {
+					distance = 1;
+				}
+
+				distance *= (float)scores [scoreIndex] [0] / (float)(scores [scoreIndex].Length-1);
+
+				motionAngleAndDistance [beatCounter, 1] = distance;
+				beatCounter++;
+			}
+		}
+	}
 
 	void drawScore () {
 		
@@ -407,24 +439,16 @@ public class GameScript : MonoBehaviour {
 
 				Instantiate (noteRest, noteWrapperEnemy.transform);
 
-			} else if (scores [scoreIndex] [i] == 1) {
+			} else if (scores [scoreIndex] [i] > 0) {
 
 				Instantiate (noteNormal, noteWrapperEnemy.transform);
 				
-			} else if (scores [scoreIndex] [i] == 2) {
-
-				Instantiate (noteLoud, noteWrapperEnemy.transform);
-
 			}
 		}
 
 
-		if (scores [scoreIndex] [0] == 1) {
+		if (scores [scoreIndex] [0] > 0) {
 			for (int i = 0; i < (scores[scoreIndex].Length - 1) * 3; i++) {
-				Instantiate (noteBlank, noteWrapperEnemy.transform);
-			}
-		} else if (scores [scoreIndex] [0] == 2) {
-			for (int i = 0; i < (scores[scoreIndex].Length - 1); i++) {
 				Instantiate (noteBlank, noteWrapperEnemy.transform);
 			}
 		}
@@ -443,7 +467,6 @@ public class GameScript : MonoBehaviour {
 	}
 
 	void calcPositionForIcon () {
-		Debug.Log ("childcount = " + noteWrapperEnemy.transform.childCount);
 		posIconMoveX = noteWrapperEnemy.transform.GetChild (0).transform.position.x;
 		float intervalIconMoveX = noteWrapperEnemy.transform.GetChild (1).transform.position.x - posIconMoveX;
 
@@ -453,8 +476,6 @@ public class GameScript : MonoBehaviour {
 
 
 	public void onClick () {
-		
-		resultBoard.SetActive (false);
 		audioSources [5].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
 
 		player.GetComponent<playerBehavier> ().playStartAnimation ();
@@ -465,24 +486,17 @@ public class GameScript : MonoBehaviour {
 		state = State.Idle;
 	}
 
-	public void onSlide (float value) {
-		
-		BPM = value;
-		bpmText.text = "BPM: " + value;
-	}
-
 	public void stopMusic() {
 
 		state = State.Stop;
 		audioSources [5].Stop ();
-		resultBoard.SetActive (true);
 		return;
 	}
 
 	public void onTapPlayPauseButton (GameObject button) {
 		GameObject iconPause = button.transform.FindChild("IconPause").gameObject;
 		GameObject iconPlay = button.transform.FindChild("IconPlay").gameObject;
-		if (iconPlay.active) {
+		if (iconPlay.activeSelf) {
 			iconPlay.SetActive (false);
 			iconPause.SetActive (true);
 
@@ -500,12 +514,10 @@ public class GameScript : MonoBehaviour {
 
 			state = State.Stop;
 			audioSources [5].Stop ();
-			resultBoard.SetActive (true);
 		}
 	}
 
 	public void onValueChanged (bool value) {
-		Debug.Log (value);
 		isActiveMic = value;
 		#if UNITY_EDITOR
 		#elif UNITY_IOS

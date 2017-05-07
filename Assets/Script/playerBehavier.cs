@@ -14,6 +14,7 @@ public class playerBehavier : MonoBehaviour {
 	public SVGAsset greatRate;
 	public SVGAsset perfectRate;
 
+	
 	Mesh[] meshs;
 
 	// Use this for initialization
@@ -27,17 +28,54 @@ public class playerBehavier : MonoBehaviour {
 	}
 
 	public void playBaseRhythm () {
-		GetComponent<Animator> ().SetTrigger ("kick");
+		transform.localScale = new Vector3 (1.1f, 1.1f, 1.1f);
+
+		Hashtable animationBaseRhythm = new Hashtable ();
+		animationBaseRhythm.Add("scale", new Vector3(1f, 1f, 1f));
+		animationBaseRhythm.Add("time", 0.1);
+		animationBaseRhythm.Add("easetype", "easeOutBounce");
+		iTween.ScaleTo(gameObject, animationBaseRhythm);
 	}
 
 	public void playStartAnimation () {
-		GetComponent<Animator> ().SetTrigger ("start");
+		Hashtable animationGetStartPos = new Hashtable ();
+		if (gameObject.name == "Enemy") {
+			animationGetStartPos.Add ("position", new Vector3 (16f, 4.6f, - 2f));
+		} else {
+			animationGetStartPos.Add ("position", new Vector3 (10f, 4.6f, - 2f));
+		}
+		animationGetStartPos.Add("time", 4);
+		animationGetStartPos.Add("easetype", "easeInOutCubic");
+		iTween.MoveTo(gameObject, animationGetStartPos);
 	}
 
 	public void shakeGraphic () {
 	}
 
-	public void changeGrapics () {
+	public void translateCharacter (float[] angleAndDistance) {
+		float angle = angleAndDistance[0];
+		float distance = angleAndDistance[1] * 10;
+						Debug.Log ("distsnce:" + distance);
+
+		float rad = angle * Mathf.Deg2Rad;
+
+		//rad(ラジアン角)から発射用ベクトルを作成
+		float x = Mathf.Sin(rad) * distance;
+		float y = Mathf.Cos(rad) * distance;
+		Debug.Log ("x,y : " + x + "," + y);
+
+		Hashtable animationTranslateToNextPos = new Hashtable ();
+
+		animationTranslateToNextPos.Add ("amount", new Vector3 (x, y, 0));
+//
+//		if (gameObject.name == "Enemy") {
+//			animationTranslateToNextPos.Add ("position", new Vector3 (x, y));
+//		} else {
+////			animationTranslateToNextPos.Add ("position", new Vector3 (3.2f, 4.4f - 2f));
+//		}
+		animationTranslateToNextPos.Add("time", angleAndDistance[1] * 0.5f);
+		animationTranslateToNextPos.Add("easetype", "easeOutCubic");
+		iTween.MoveBy (gameObject, animationTranslateToNextPos);
 	}
 
 	public void playParticle () {
@@ -47,7 +85,6 @@ public class playerBehavier : MonoBehaviour {
 			psr.mesh = meshs [i];
 			Vector3 pos = transform.position;
 			pos.z = -1.0f;
-			pos.y += gameObject.GetComponent<SpriteRenderer>().bounds.size.y/2;
 			ptcle.transform.position = pos;
 			ptcle.transform.parent = transform;
 			Destroy (ptcle, .5f);
