@@ -9,6 +9,10 @@ public class playerBehavier : MonoBehaviour {
 	public GameObject particle;
 	public Mesh p1, p2, p3, p4, p5, p6, p7, p8;
 
+	public GameObject trailParticle;
+
+	public GameObject markerTrail;
+
 	public GameObject textRate;
 	public SVGAsset goodRate;
 	public SVGAsset greatRate;
@@ -49,30 +53,23 @@ public class playerBehavier : MonoBehaviour {
 		iTween.MoveTo(gameObject, animationGetStartPos);
 	}
 
-	public void shakeGraphic () {
+	public void drawMarker () {
+		GameObject marker = Instantiate(markerTrail);
+		marker.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z+1);
 	}
 
 	public void translateCharacter (float[] angleAndDistance) {
 		float angle = angleAndDistance[0];
 		float distance = angleAndDistance[1] * 10;
-						Debug.Log ("distsnce:" + distance);
 
 		float rad = angle * Mathf.Deg2Rad;
 
-		//rad(ラジアン角)から発射用ベクトルを作成
 		float x = Mathf.Sin(rad) * distance;
 		float y = Mathf.Cos(rad) * distance;
-		Debug.Log ("x,y : " + x + "," + y);
 
 		Hashtable animationTranslateToNextPos = new Hashtable ();
 
 		animationTranslateToNextPos.Add ("amount", new Vector3 (x, y, 0));
-//
-//		if (gameObject.name == "Enemy") {
-//			animationTranslateToNextPos.Add ("position", new Vector3 (x, y));
-//		} else {
-////			animationTranslateToNextPos.Add ("position", new Vector3 (3.2f, 4.4f - 2f));
-//		}
 		animationTranslateToNextPos.Add("time", angleAndDistance[1] * 0.5f);
 		animationTranslateToNextPos.Add("easetype", "easeOutCubic");
 		iTween.MoveBy (gameObject, animationTranslateToNextPos);
@@ -88,7 +85,15 @@ public class playerBehavier : MonoBehaviour {
 			ptcle.transform.position = pos;
 			ptcle.transform.parent = transform;
 			Destroy (ptcle, .5f);
+			if (i == 0) {
+				GameObject trailPtcle = Instantiate(trailParticle);
+				trailPtcle.transform.position = pos;
+				trailPtcle.transform.parent = transform;
+				Destroy (ptcle, .5f);
+			}
 		}
+
+
 	}
 
 	public void drawRate (GameScript.Rate rate) {

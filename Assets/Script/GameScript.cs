@@ -265,6 +265,11 @@ public class GameScript : MonoBehaviour {
 					drawScore ();
 					defineCharactersMotionInATurn ();
 
+					GameObject[] markers = GameObject.FindGameObjectsWithTag("Marker");
+					foreach (GameObject marker in markers) {
+						Destroy (marker);
+					}
+
 					turnIndex++;
 
 					iconEnemy.transform.position = new Vector3 (posIconMoveX, iconEnemy.transform.position.y);
@@ -276,6 +281,7 @@ public class GameScript : MonoBehaviour {
 				} else if (state == State.Enemy) {
 					state = State.Player;
 
+					noteIndex = 0;
 					iconPlayer.transform.position = new Vector3 (posIconMoveX, iconPlayer.transform.position.y);
 
 					iconEnemy.SetActive (false);
@@ -322,6 +328,7 @@ public class GameScript : MonoBehaviour {
 					float[] angleAndDistance = { motionAngleAndDistance [noteIndex, 0], motionAngleAndDistance [noteIndex, 1] };
 					enemy.GetComponent<playerBehavier> ().translateCharacter (angleAndDistance);
 					enemy.GetComponent<playerBehavier> ().playParticle ();
+//					enemy.GetComponent<playerBehavier> ().drawMarker ();
 					noteIndex++;
 				}
 			}
@@ -375,9 +382,14 @@ public class GameScript : MonoBehaviour {
 
 	void tapBeat() {
 		audioSources [1].Play ();
-//		player.GetComponent<playerBehavier> ().translateCharacter ();
+		float[] angleAndDistance = { motionAngleAndDistance [noteIndex, 0], motionAngleAndDistance [noteIndex, 1] };
+		player.GetComponent<playerBehavier> ().translateCharacter (angleAndDistance);
 		player.GetComponent<playerBehavier> ().playParticle ();
-//		player.GetComponent<playerBehavier> ().shakeGraphic ();
+		noteIndex++;
+		if (noteIndex == motionAngleAndDistance.GetLength (0)) {
+			noteIndex = 0;
+		}
+//		player.GetComponent<playerBehavier> ().drawMarker ();
 	}
 
 	void defineCharactersMotionInATurn () {
