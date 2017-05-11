@@ -27,17 +27,17 @@ public class GameScript : MonoBehaviour {
 
 	int[][] scores = new int[][]{
 		new int[] {16},
-		new int[] {4,315,0,225,180,0,270,360,0}, 
-		new int[] {4,180,0,270,0,360,90,360,90},
-		new int[] {4,135,0,225,0,0,315,45,0},
-		new int[] {4,270,0,180,0,0,270,360,0},
-		new int[] {4,90,0,360,0,0,90,180,0},
+		new int[] {4,360,0,270,0,0,135,0,0}, 
+		new int[] {4,180,0,270,0,45,135,45,135},
+		new int[] {4,45,0,315,0,0,225,135,0},
 		new int[] {8},
-		new int[] {2,1,0,1,1},
-		new int[] {2,1,0,1,1},
+		new int[] {4,315,0,225,0,0,135,45,0},
+		new int[] {4,90,0,360,0,0,270,180,0},
+		new int[] {4,45,135,225,315,0,225,135,45},
+		new int[] {4,90,0,0,180,270,0,45,0,315,225,0,0,180,90,0,0},
+		new int[] {8},
 		new int[] {2,1,0,1,1,1,0,0,0},
 		new int[] {2,1,0,1,1,1,0,0,0},
-		new int[] {8},
 		new int[] {4,1,0,0,1,1,0,0,1,1,0,1,1,1,0,0,0},
 		new int[] {2,1,0,1,1,1,0,0,0},
 		new int[] {4},
@@ -89,10 +89,15 @@ public class GameScript : MonoBehaviour {
 
 	public GameObject player;
 	public GameObject enemy;
+	public GameObject textRate;
+	public GameObject iconTurn;
+	public Sprite iconTurnPlayer;
+	public Sprite iconTurnEnemy;
 	public Text fpsText;
 
-	private AudioSource[] audioSources = new AudioSource[6];
-	public AudioClip snare;
+	private AudioSource[] audioSources = new AudioSource[7];
+	public AudioClip can;
+	public AudioClip clap;
 	public AudioClip kick;
 	public AudioClip perfect;
 	public AudioClip great;
@@ -103,7 +108,7 @@ public class GameScript : MonoBehaviour {
 	float[,] motionAngleAndDistance;
 
 	float posIconMoveX;
-	float posIconMoveToX;
+//	float posIconMoveToX;
 
 
 	int paddingOfScore;
@@ -160,19 +165,20 @@ public class GameScript : MonoBehaviour {
 		Application.targetFrameRate = 60;
 
 		// 音の設定
-		for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < 7; i++) {
 			GameObject child = new GameObject("AudioPlayer");
 			child.transform.parent = gameObject.transform;
 			audioSources[i] = child.AddComponent<AudioSource>();
 		}
 
 		audioSources [0].clip = kick;
-		audioSources [1].clip = snare;
+		audioSources [1].clip = clap;
 		audioSources [2].clip = perfect;
 		audioSources [3].clip = great;
 		audioSources [4].clip = good;
+		audioSources [5].clip = can;
 
-		audioSources [5].clip = bgm;
+		audioSources [6].clip = bgm;
 
 		BPM = 120f;
 
@@ -212,11 +218,11 @@ public class GameScript : MonoBehaviour {
 
 		if (state == State.Enemy) {
 
-			iconEnemy.transform.Translate (Vector3.right * Time.deltaTime * ((posIconMoveToX - posIconMoveX) / 2) * (BPM / 120f));
+//			iconEnemy.transform.Translate (Vector3.right * Time.deltaTime * ((posIconMoveToX - posIconMoveX) / 2) * (BPM / 120f));
 
 		} else if (state == State.Player) {
 
-			iconPlayer.transform.Translate (Vector3.right * Time.deltaTime * ((posIconMoveToX - posIconMoveX) / 2) * (BPM / 120f));
+//			iconPlayer.transform.Translate (Vector3.right * Time.deltaTime * ((posIconMoveToX - posIconMoveX) / 2) * (BPM / 120f));
 			onTap ();
 		} else if (state == State.Idle) {
 			onTap ();
@@ -246,13 +252,15 @@ public class GameScript : MonoBehaviour {
 
 				turnIndex++;
 
-				iconEnemy.transform.position = new Vector3 (posIconMoveX, iconEnemy.transform.position.y);
+//				iconEnemy.transform.position = new Vector3 (posIconMoveX, iconEnemy.transform.position.y);
 
 				iconPlayer.SetActive (false);
 				iconEnemy.SetActive (false);
+				iconTurn.SetActive (false);
 			// バトル中の場合
 			} else {
 				score.SetActive (true);
+
 				// 敵のターン中の処理
 				if (state == State.Player || state == State.Idle) {
 					state = State.Enemy;
@@ -272,10 +280,12 @@ public class GameScript : MonoBehaviour {
 
 					turnIndex++;
 
-					iconEnemy.transform.position = new Vector3 (posIconMoveX, iconEnemy.transform.position.y);
+//					iconEnemy.transform.position = new Vector3 (posIconMoveX, iconEnemy.transform.position.y);
 
 					iconPlayer.SetActive (false);
 					iconEnemy.SetActive (true);
+					iconTurn.SetActive (true);
+					iconTurn.GetComponent<Image> ().sprite = iconTurnEnemy;
 
 				// プレイヤーのターン中の処理
 				} else if (state == State.Enemy) {
@@ -286,6 +296,8 @@ public class GameScript : MonoBehaviour {
 
 					iconEnemy.SetActive (false);
 					iconPlayer.SetActive (true);
+					iconTurn.SetActive (true);
+					iconTurn.GetComponent<Image> ().sprite = iconTurnPlayer;
 				}
 			}
 			beatIndex = 0;
@@ -324,11 +336,10 @@ public class GameScript : MonoBehaviour {
 			if (state == State.Enemy) {
 				if (scores[scoreIndex][beatIndex] > 0) {
 					
-					audioSources [1].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
+					audioSources [5].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
 					float[] angleAndDistance = { motionAngleAndDistance [noteIndex, 0], motionAngleAndDistance [noteIndex, 1] };
 					enemy.GetComponent<playerBehavier> ().translateCharacter (angleAndDistance);
 					enemy.GetComponent<playerBehavier> ().playParticle ();
-//					enemy.GetComponent<playerBehavier> ().drawMarker ();
 					noteIndex++;
 				}
 			}
@@ -376,20 +387,24 @@ public class GameScript : MonoBehaviour {
 				point += 20;
 				audioSources [4].Play ();
 			}
-			player.GetComponent<playerBehavier> ().drawRate (rate);
+
+			GameObject rateObject = Instantiate (textRate);
+			rateObject.GetComponent<TextRateView> ().setRate (rate);
+			rateObject.transform.parent = player.transform;
+			Destroy (rateObject, 0.5f);
+
 		}
 	}
 
 	void tapBeat() {
 		audioSources [1].Play ();
-		float[] angleAndDistance = { motionAngleAndDistance [noteIndex, 0], motionAngleAndDistance [noteIndex, 1] };
+		float[] angleAndDistance = { -(motionAngleAndDistance [noteIndex, 0]), motionAngleAndDistance [noteIndex, 1] };
 		player.GetComponent<playerBehavier> ().translateCharacter (angleAndDistance);
 		player.GetComponent<playerBehavier> ().playParticle ();
 		noteIndex++;
 		if (noteIndex == motionAngleAndDistance.GetLength (0)) {
 			noteIndex = 0;
 		}
-//		player.GetComponent<playerBehavier> ().drawMarker ();
 	}
 
 	void defineCharactersMotionInATurn () {
@@ -483,12 +498,12 @@ public class GameScript : MonoBehaviour {
 		float intervalIconMoveX = noteWrapperEnemy.transform.GetChild (1).transform.position.x - posIconMoveX;
 
 		posIconMoveX -= intervalIconMoveX / (32 / noteWrapperEnemy.transform.childCount);
-		posIconMoveToX = posIconMoveX + noteWrapperEnemy.transform.childCount * intervalIconMoveX;
+//		posIconMoveToX = posIcsonMoveX + noteWrapperEnemy.transform.childCount * intervalIconMoveX;
 	}
 
 
 	public void onClick () {
-		audioSources [5].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
+		audioSources [6].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
 
 		player.GetComponent<playerBehavier> ().playStartAnimation ();
 		enemy.GetComponent<playerBehavier> ().playStartAnimation ();
@@ -501,7 +516,7 @@ public class GameScript : MonoBehaviour {
 	public void stopMusic() {
 
 		state = State.Stop;
-		audioSources [5].Stop ();
+		audioSources [6].Stop ();
 		return;
 	}
 
@@ -512,7 +527,7 @@ public class GameScript : MonoBehaviour {
 			iconPlay.SetActive (false);
 			iconPause.SetActive (true);
 
-			audioSources [5].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
+			audioSources [6].PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
 
 			player.GetComponent<playerBehavier> ().playStartAnimation ();
 			enemy.GetComponent<playerBehavier> ().playStartAnimation ();
@@ -525,7 +540,7 @@ public class GameScript : MonoBehaviour {
 			iconPause.SetActive (false);
 
 			state = State.Stop;
-			audioSources [5].Stop ();
+			audioSources [6].Stop ();
 		}
 	}
 

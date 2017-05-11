@@ -37,7 +37,8 @@ public class CameraBehavior : MonoBehaviour {
 	public void playStartAnimation () {
 		
 		Hashtable animationGetStartPos = new Hashtable ();
-		animationGetStartPos.Add ("position", new Vector3 (13f, 6f, -11f));
+		animationGetStartPos.Add ("position", new Vector3 (13f, 5.4f, -19f));
+		animationGetStartPos.Add ("delay", 2);
 		animationGetStartPos.Add ("time", 4);
 		animationGetStartPos.Add ("easetype", "easeInOutCubic");
 		iTween.MoveTo(gameObject, animationGetStartPos);
