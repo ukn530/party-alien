@@ -9,6 +9,7 @@ public class CameraBehavior : MonoBehaviour {
 	float distance;
 
 
+
 	// Use this for initialization
 	void Start () {
 		
