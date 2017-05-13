@@ -18,28 +18,39 @@ public class NewGameGameScript : MonoBehaviour {
 	float timeStompForQuarterBeat;
 	float timeStompForBar;
 	float timePerQuarterBeat;
-	float BPM;
+	float timePerBar;
+	float timeCounterFromLastTap;
+	public static float BPM;
 
 	AudioSource baseBeatAS = new AudioSource ();
 	public AudioClip baseBeatAC;
 
 	GameObject player;
-	GameObject ground;
+	GameObject[] grounds;
+	bool[] notesMemory = new bool[16];
+
+	bool isDownBody = false;
 
 
 	void Start () {
 		Application.targetFrameRate = 60;
-		BPM = 104f;
+		BPM = 120f;
 
 		newGameState = NewGameState.Idle;
 
 		player = GameObject.FindGameObjectWithTag ("Player");
-		ground = GameObject.FindGameObjectWithTag ("Ground");
+		grounds = GameObject.FindGameObjectsWithTag ("Ground");
 
 		GameObject child = new GameObject("AudioPlayer");
 		child.transform.parent = gameObject.transform;
 		baseBeatAS = child.AddComponent<AudioSource>();
 		baseBeatAS.clip = baseBeatAC;
+		baseBeatAS.volume = 0.6f;
+		baseBeatAS.loop = true;
+
+		for (int i = 0; i < notesMemory.Length; i++) {
+			notesMemory [i] = false;
+		}
 
 		resetSong ();
 	}
@@ -47,39 +58,72 @@ public class NewGameGameScript : MonoBehaviour {
 	void Update () {
 
 		if (Input.GetKeyDown (KeyCode.Space)||Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began ) {
-			if (newGameState == NewGameState.Idle) {
-				newGameState = NewGameState.Play;
-			} else if (newGameState == NewGameState.Play) {
-				checkTiming ();
-			}
+			onTapListner ();
 		}
+
+		if (newGameState == NewGameState.Play) {
+			// 最後のタップから2拍何もなかったらしゃがむ
+			if (timeCounterFromLastTap > timePerQuarterBeat * 2 && !isDownBody) {
+				isDownBody = true;
+				restForQuarterBeat ();
+
+			}
+			timeCounterFromLastTap += Time.deltaTime;
+		}
+
 		// 4拍子の各1拍
 		if (newGameState == NewGameState.Play) {
-			eachABar ();
-			eachQuarterBeat ();
+
+			if (timeCounterInASong >= timeStompForBar) {
+				timeStompForBar += timePerQuarterBeat * 4;
+				eachABar ();
+			}
+
+			if (timeCounterInASong >= timeStompForQuarterBeat) {
+				timeStompForQuarterBeat += timePerQuarterBeat;
+				eachQuarterBeat ();
+			}
 			each16Beat ();
 			timeCounterInASong += Time.deltaTime;
 		}
 	}
 
-	// 1小節ごとに1回呼ぶ
-	void eachABar () {
-		if (timeCounterInASong >= timeStompForBar) {
-			timeStompForBar += timePerQuarterBeat * 4;
+	void onTapListner () {
+		if (newGameState == NewGameState.Idle) {
+			newGameState = NewGameState.Play;
+
 			if (baseBeatAS.isPlaying) {
 				baseBeatAS.Stop ();
 			}
 			baseBeatAS.PlayScheduled (AudioSettings.dspTime + timePerQuarterBeat / 8);
+
+		} else if (newGameState == NewGameState.Play) {
+			checkTiming ();
+			timeCounterFromLastTap = 0;
+			isDownBody = false;
+		}
+	}
+
+	// 1小節ごとに1回呼ぶ
+	void eachABar () {
+
+		for (int i = 0; i < notesMemory.Length; i++) {
+			notesMemory [i] = false;
 		}
 	}
 
 	// 4拍子の各1拍
 	void eachQuarterBeat () {
-		if (timeCounterInASong >= timeStompForQuarterBeat) {
-			timeStompForQuarterBeat += timePerQuarterBeat;
 
-//			player.GetComponent<NewGamePlayer> ().PlayBaseRhythm ();
-			ground.GetComponent<NewGameGround> ().ChangeColorWhite ();
+		StartCoroutine(LateStart(0.1F));
+	}
+
+	IEnumerator LateStart (float time) {
+		yield return new WaitForSeconds (time);
+
+		player.GetComponent<Animator> ().SetTrigger ("BaseRhythm");
+		for (int i = 0; i < grounds.Length; i++) {
+			grounds[i].GetComponent<NewGameGround> ().ChangeColorWhite ();
 		}
 	}
 
@@ -87,22 +131,21 @@ public class NewGameGameScript : MonoBehaviour {
 		
 	}
 
+	void restForQuarterBeat () {
+		player.GetComponent<NewGamePlayer> ().DownBody ();
+	}
+
 	void checkTiming () {
-		float errorDuration = timePerQuarterBeat / 32; // 大きくすると判定が厳しくなる
-		if (timeStompForQuarterBeat - timePerQuarterBeat + errorDuration < timeCounterInASong && timeCounterInASong < timeStompForQuarterBeat - timePerQuarterBeat + timePerQuarterBeat / 4 - errorDuration) {
-
-			player.GetComponent<NewGamePlayer> ().TapOnTime (1);
-		} else if (timeStompForQuarterBeat - timePerQuarterBeat * 0.75 + errorDuration < timeCounterInASong && timeCounterInASong < timeStompForQuarterBeat - timePerQuarterBeat * 0.75 + timePerQuarterBeat / 4 - errorDuration) {
-
-			player.GetComponent<NewGamePlayer> ().TapOnTime (2);
-		} else if (timeStompForQuarterBeat - timePerQuarterBeat * 0.5 + errorDuration < timeCounterInASong && timeCounterInASong < timeStompForQuarterBeat - timePerQuarterBeat * 0.5 + timePerQuarterBeat / 4 - errorDuration) {
-
-			player.GetComponent<NewGamePlayer> ().TapOnTime (3);
-		} else if (timeStompForQuarterBeat - timePerQuarterBeat * 0.25 + errorDuration < timeCounterInASong && timeCounterInASong < timeStompForQuarterBeat - timePerQuarterBeat * 0.25 + timePerQuarterBeat / 4 - errorDuration) {
-
-			player.GetComponent<NewGamePlayer> ().TapOnTime (4);
-		} else {
-
+		float errorDuration = timePerQuarterBeat/32; // 大きくすると判定が厳しくなる
+		bool onTime = false;
+		for (int i = 0; i < notesMemory.Length; i++) {
+			if (timeStompForBar - timePerBar * (notesMemory.Length-i)/notesMemory.Length + errorDuration <= timeCounterInASong && timeCounterInASong < timeStompForBar - timePerBar * (notesMemory.Length-i-1)/notesMemory.Length - errorDuration) {
+				notesMemory [i] = true;
+				onTime = true;
+			}
+		}
+		player.GetComponent<NewGamePlayer> ().TapOnTime (notesMemory);
+		if (!onTime) {
 			player.GetComponent<NewGamePlayer> ().TapOnBadTime ();
 		}
 	}
@@ -110,6 +153,7 @@ public class NewGameGameScript : MonoBehaviour {
 	public void resetSong () {
 
 		timePerQuarterBeat = 60f / BPM;
+		timePerBar = 240f / BPM;
 		timeStompForQuarterBeat = 0;
 		timeCounterInASong = 0;
 		timeStompForBar = 0;
